@@ -2,6 +2,7 @@ package base;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterClass;
 import pages.*;
 
 public class BaseTests {
@@ -44,6 +45,10 @@ public class BaseTests {
         ccApplicationPage2.scrollToCashBackAPR();
         float cashRate = ccApplicationPage2.getAPRPercentage();
         assert(cashRate > 20.00);
+    }
+
+    @AfterClass
+    public void cleanup() {
         driver.quit();
     }
 }
