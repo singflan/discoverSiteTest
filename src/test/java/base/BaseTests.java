@@ -1,49 +1,49 @@
 package base;
 
-import org.checkerframework.checker.units.qual.C;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import pages.CCApplicationPage;
-import pages.CreditCardsPage;
-import pages.HomePage;
+import pages.*;
 
 public class BaseTests {
-    private WebDriver driver;
+    private static WebDriver driver;
+    protected Page page;
     protected HomePage homePage;
     protected CreditCardsPage ccPage;
-    protected CCApplicationPage ccApplicationPage;
+    protected CCApplicationPage1 ccApplicationPage1;
+    protected CCApplicationPage2 ccApplicationPage2;
+    private static final String pageURL = "https://www.discover.com/";
 
     public void setUp() {
-//        System.setProperty("webdriver.chrome.driver", "../../resources/chromedriver");
         driver = new ChromeDriver();
-        driver.get("https://www.discover.com/");
+        driver.get(pageURL);
+        homePage = new HomePage();
+        homePage.setWebDriver(driver);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         BaseTests test = new BaseTests();
-//        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
-//        System.out.println(driver.getTitle());
         test.setUp();
         test.testSecuredCreditCardAPRPercentage();
     }
 
-    public void testSecuredCreditCardAPRPercentage() {
-        homePage = new HomePage(driver);
+    public void testSecuredCreditCardAPRPercentage() throws InterruptedException {
 
         // Click on Credit Card button
         ccPage = homePage.clickCreditCardsButton();
 
         // Scroll down to Secured Credit Card Apply Now Button
         ccPage.scrollToSecuredCCSection();
-        ccApplicationPage = ccPage.clickApplyNowForSecuredCC();
+        int securedCCIndex = ccPage.getSecuredCCIndex();
+        ccApplicationPage1 = ccPage.clickApplyNowForSecuredCC(securedCCIndex);
 //
         // Skip pre-fill step
-        ccApplicationPage.clickSkipThisStepButton();
+        ccApplicationPage2 = ccApplicationPage1.clickSkipThisStepButton();
 
         // Assert that the APR for Cash Advances is greater than 20%
-
+        ccApplicationPage2.scrollToImportantInfoSection();
+        ccApplicationPage2.scrollToCashBackAPR();
+        float cashRate = ccApplicationPage2.getAPRPercentage();
+        assert(cashRate > 20.00);
         driver.quit();
     }
 }
